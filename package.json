@@ -1,0 +1,46 @@
+{
+  "name": "mangayomi-sync-server",
+  "version": "1.0.0",
+  "description": "The sync server for mangayomi",
+  "main": "app.ts",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "node --es-module-specifier-resolution=node dist/app.js",
+    "buildstart": "tsc && node --es-module-specifier-resolution=node dist/app.js"
+  },
+  "keywords": [],
+  "author": "hollow_frenk",
+  "contributors": [
+    "hollow_frenk"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "argon2": "^0.41.1",
+    "axios": "^1.7.7",
+    "class-validator": "^0.14.1",
+    "compression": "^1.7.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^5.0.1",
+    "jsonpath-plus": "^10.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "long": "^5.2.3",
+    "multer": "1.4.5-lts.1",
+    "mysql2": "^3.11.4",
+    "sequelize": "^6.37.5",
+    "tslib": "^2.8.1",
+    "unzipper": "^0.12.3"
+  },
+  "devDependencies": {
+    "@types/compression": "^1.7.5",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.9.0",
+    "@types/unzipper": "^0.10.10",
+    "typescript": "^5.6.3"
+  }
+}

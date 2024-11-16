@@ -1,0 +1,62 @@
+services:
+  tailscale:
+    image: tailscale/tailscale:latest
+    env_file:
+      - .env   # Carica le variabili dal file .env
+    environment:
+      - TS_AUTHKEY=${TAILSCALE_AUTH_KEY}
+      - TS_HOSTNAME=${TAILSCALE_HOST_NAME}
+    network_mode: "host"
+    volumes:
+      - /var/lib/tailscale:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+      - /var/run/tailscale:/var/run/tailscale
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_MODULE
+    privileged: true
+    restart: unless-stopped
+
+  server:
+    image: ghcr.io/hollow_frenk/mangayomi-sync-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    privileged: true
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - MODE=prod
+      - DATABASE_URI=mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@database:3306/${MYSQL_DATABASE}
+      - DB_DIALECT=mysql
+      - CORS_ORIGIN_URL=${CORS_ORIGIN_URL} # Imposta CORS per accettare solo richieste dal Tailscale IP
+    depends_on:
+      database:
+        condition: service_healthy
+      tailscale:
+        condition: service_started
+    ports:
+      - ${PORT}:${PORT}
+    volumes:
+      - /var/run/tailscale:/var/run/tailscale
+
+  database:
+    image: mysql/mysql-server:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - MYSQL_ROOT_HOST=%
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+      start_period: 5s
+      interval: 5s
+      timeout: 1s
+      retries: 15
+    volumes:
+      - database-data:/var/lib/mysql
+
+volumes:
+  database-data:
