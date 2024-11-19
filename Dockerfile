@@ -32,5 +32,5 @@ COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 COPY --from=builder --chown=node:node /app/dist ./dist
 
 USER node
-# Esegui l'app e Tailscale tramite start.sh
-CMD [ "node", "--es-module-specifier-resolution=node", "dist/app.js", "/app/start.sh" ]
+# Esegui l'app
+CMD [ "node", "--es-module-specifier-resolution=node", "dist/app.js"]
