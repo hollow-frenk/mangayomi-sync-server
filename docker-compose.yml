@@ -1,23 +1,4 @@
 services:
-  tailscale:
-    image: tailscale/tailscale:latest
-    env_file:
-      - .env   # Carica le variabili dal file .env
-    environment:
-      - TS_AUTHKEY=${TAILSCALE_AUTH_KEY}
-      - TS_HOSTNAME=${TAILSCALE_HOST_NAME}
-    network_mode: "host"
-    volumes:
-      - /var/lib/tailscale:/var/lib/tailscale
-      - /dev/net/tun:/dev/net/tun
-      - /var/run/tailscale:/var/run/tailscale
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-      - SYS_MODULE
-    privileged: true
-    restart: unless-stopped
-
   server:
     image: ghcr.io/hollow_frenk/mangayomi-sync-server
     build:
