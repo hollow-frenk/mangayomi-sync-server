@@ -16,12 +16,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
-      tailscale:
-        condition: service_started
     ports:
       - ${PORT}:${PORT}
-    volumes:
-      - /var/run/tailscale:/var/run/tailscale
 
   database:
     image: mysql/mysql-server:latest
