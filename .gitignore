@@ -1,2 +1,3 @@
 .env
 .DS_Store
+.command_to_run_after_update
