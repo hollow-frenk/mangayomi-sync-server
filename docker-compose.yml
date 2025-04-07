@@ -20,7 +20,7 @@ services:
       - ${PORT}:${PORT}
 
   database:
-    image: mysql/mysql-server:latest
+    image: mysql/mysql-server:9.2.0-oraclelinux9 # Changed to use Oracle Linux 9 based image
     restart: unless-stopped
     env_file:
       - .env
