@@ -65,9 +65,9 @@ jobs:
           else
             git log --pretty=format:'- %s' > changes.txt
           fi
-          # Output multilinea compatibile con GitHub Actions
+          # Output multilinea compatibile con GitHub Actions (safe)
           echo "changelog<<EOF" >> $GITHUB_ENV
-          cat changes.txt >> $GITHUB_ENV
+          cat changes.txt | sed 's/\r//' >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
       - name: Create Release
