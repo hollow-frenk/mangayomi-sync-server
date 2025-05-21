@@ -65,9 +65,10 @@ jobs:
           else
             git log --pretty=format:'- %s' > changes.txt
           fi
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          cat changes.txt >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          # Output multilinea compatibile con GitHub Actions
+          echo "changelog<<EOF" >> $GITHUB_ENV
+          cat changes.txt >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Create Release
         if: steps.check_tag.outputs.exists == 'false'
@@ -79,6 +80,6 @@ jobs:
             Release automatico generato dalla versione ${{ steps.pkg.outputs.version }} su main.
 
             ## Modifiche incluse
-            ${{ steps.changelog.outputs.changelog }}
+            ${{ env.changelog }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
