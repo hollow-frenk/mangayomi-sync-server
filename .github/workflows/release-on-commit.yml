@@ -1,0 +1,84 @@
+name: Release on Commit
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Check if tag already exists
+        id: check_tag
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "Tag v$VERSION already exists. Skipping release."
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Bump patch version (se richiesto)
+        if: steps.check_tag.outputs.exists == 'true'
+        run: |
+          npm version patch --no-git-tag-version
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add package.json package-lock.json || true
+          git commit -m "chore: bump version [skip ci]"
+          git push
+
+      - name: Read version from package.json
+        id: pkg
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Estratto automatico delle modifiche (git log)
+        id: changelog
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          # Estrai i commit dalla release precedente (se esiste) fino a HEAD
+          if git rev-parse "v$VERSION"^ >/dev/null 2>&1; then
+            PREV_TAG=$(git tag --sort=-creatordate | grep -v ",$VERSION$" | head -n1)
+            if [ -n "$PREV_TAG" ]; then
+              git log "$PREV_TAG"..HEAD --pretty=format:'- %s' > changes.txt
+            else
+              git log --pretty=format:'- %s' > changes.txt
+            fi
+          else
+            git log --pretty=format:'- %s' > changes.txt
+          fi
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          cat changes.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.pkg.outputs.version }}
+          name: Release v${{ steps.pkg.outputs.version }}
+          body: |
+            Release automatico generato dalla versione ${{ steps.pkg.outputs.version }} su main.
+
+            ## Modifiche incluse
+            ${{ steps.changelog.outputs.changelog }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
