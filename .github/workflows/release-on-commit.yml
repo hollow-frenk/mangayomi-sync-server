@@ -54,7 +54,6 @@ jobs:
         id: changelog
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          # Estrai i commit dalla release precedente (se esiste) fino a HEAD
           if git rev-parse "v$VERSION"^ >/dev/null 2>&1; then
             PREV_TAG=$(git tag --sort=-creatordate | grep -v ",$VERSION$" | head -n1)
             if [ -n "$PREV_TAG" ]; then
@@ -65,10 +64,8 @@ jobs:
           else
             git log --pretty=format:'- %s' > changes.txt
           fi
-          # Output multilinea compatibile con GitHub Actions (safe)
-          echo "changelog<<EOF" >> $GITHUB_ENV
-          cat changes.txt | sed 's/\r//' >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          CHANGELOG=$(cat changes.txt | sed ':a;N;$!ba;s/\n/\\n/g')
+          echo "changelog=$CHANGELOG" >> $GITHUB_OUTPUT
 
       - name: Create Release
         if: steps.check_tag.outputs.exists == 'false'
@@ -80,6 +77,6 @@ jobs:
             Release automatico generato dalla versione ${{ steps.pkg.outputs.version }} su main.
 
             ## Modifiche incluse
-            ${{ env.changelog }}
+            ${{ steps.changelog.outputs.changelog }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
