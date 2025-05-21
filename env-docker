@@ -1,0 +1,14 @@
+MYSQL_ROOT_HOST="%"
+MYSQL_ROOT_PASSWORD="notsecret"
+MYSQL_DATABASE=mangayomi
+MYSQL_USER=mangayomi
+MYSQL_PASSWORD="notsecret"
+
+JWT_SECRET_KEY="notsecret"
+JWT_EXPIRATION_DAYS=365
+
+MANGA_SOURCE_LIST_URL="https://kodjodevf.github.io/mangayomi-extensions/index.json"
+ANIME_SOURCE_LIST_URL="https://kodjodevf.github.io/mangayomi-extensions/anime_index.json"
+
+CORS_ORIGIN_URL="http://localhost:3000"
+PORT=3000
