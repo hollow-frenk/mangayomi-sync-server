@@ -27,22 +27,14 @@ const names = Object.freeze({
   [types.argon2id]: "argon2id",
 });
 
-const defaults = Object.freeze({
+const defaults = {
   hashLength: 32,
   timeCost: 3,
   memoryCost: 1 << 16,
   parallelism: 4,
   type: argon2id,
   version: 0x13,
-});
-
-const limits = Object.freeze({
-  hashLength: { min: 4, max: 2 ** 32 - 1 },
-  memoryCost: { min: 1 << 10, max: 2 ** 32 - 1 },
-  timeCost: { min: 2, max: 2 ** 32 - 1 },
-  parallelism: { min: 1, max: 2 ** 24 - 1 },
-});
-module.exports.limits = limits;
+};
 
 /**
  * @typedef {Object} Options
@@ -63,7 +55,7 @@ module.exports.limits = limits;
  * @overload
  * @param {Buffer | string} password The plaintext password to be hashed
  * @param {Options & { raw: true }} options The parameters for Argon2
- * @returns {Promise<Buffer>} The raw hash generated from `plain`
+ * @returns {Promise<Buffer>} The raw hash generated from `password`
  */
 /**
  * Hashes a password with Argon2, producing an encoded hash
@@ -71,7 +63,7 @@ module.exports.limits = limits;
  * @overload
  * @param {Buffer | string} password The plaintext password to be hashed
  * @param {Options & { raw?: boolean }} [options] The parameters for Argon2
- * @returns {Promise<string>} The encoded hash generated from `plain`
+ * @returns {Promise<string>} The encoded hash generated from `password`
  */
 /**
  * @param {Buffer | string} password The plaintext password to be hashed
@@ -80,12 +72,20 @@ module.exports.limits = limits;
 async function hash(password, options) {
   let { raw, salt, ...rest } = { ...defaults, ...options };
 
-  for (const [key, { min, max }] of Object.entries(limits)) {
-    const value = rest[key];
-    assert(
-      min <= value && value <= max,
-      `Invalid ${key}, must be between ${min} and ${max}.`,
-    );
+  if (rest.hashLength > 2 ** 32 - 1) {
+    throw new RangeError("Hash length is too large");
+  }
+
+  if (rest.memoryCost > 2 ** 32 - 1) {
+    throw new RangeError("Memory cost is too large");
+  }
+
+  if (rest.timeCost > 2 ** 32 - 1) {
+    throw new RangeError("Time cost is too large");
+  }
+
+  if (rest.parallelism > 2 ** 24 - 1) {
+    throw new RangeError("Parallelism is too large");
   }
 
   salt = salt ?? (await generateSalt(16));
@@ -133,17 +133,26 @@ module.exports.hash = hash;
  * @param {number} [options.timeCost=3]
  * @param {number} [options.memoryCost=65536]
  * @param {number} [options.parallelism=4]
+ * @param {number} [options.version=0x13]
  * @returns {boolean} `true` if the digest parameters do not match the parameters in `options`, otherwise `false`
  */
 function needsRehash(digest, options = {}) {
-  const { memoryCost, timeCost, version } = { ...defaults, ...options };
+  const { memoryCost, timeCost, parallelism, version } = {
+    ...defaults,
+    ...options,
+  };
 
   const {
     version: v,
-    params: { m, t },
+    params: { m, t, p },
   } = deserialize(digest);
 
-  return +v !== +version || +m !== +memoryCost || +t !== +timeCost;
+  return (
+    +v !== +version ||
+    +m !== +memoryCost ||
+    +t !== +timeCost ||
+    +p !== +parallelism
+  );
 }
 module.exports.needsRehash = needsRehash;
 
@@ -152,7 +161,7 @@ module.exports.needsRehash = needsRehash;
  * @param {Buffer | string} password The plaintext password to be verified
  * @param {Object} [options] The current parameters for Argon2
  * @param {Buffer} [options.secret]
- * @returns {Promise<boolean>} `true` if the digest parameters matches the hash generated from `plain`, otherwise `false`
+ * @returns {Promise<boolean>} `true` if the digest parameters matches the hash generated from `password`, otherwise `false`
  */
 async function verify(digest, password, options = {}) {
   const { id, ...rest } = deserialize(digest);
