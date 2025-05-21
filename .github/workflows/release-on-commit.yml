@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'README.md'
+      - 'CHANGELOG.md'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/*.md'
+      - '.gitignore'
+      - '.dockerignore'
+      - 'docs/**'
 
 jobs:
   release:
