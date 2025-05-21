@@ -23,26 +23,33 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Check if tag already exists
-        id: check_tag
+      - name: Check and bump version if needed
+        id: version_check
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
-            echo "Tag v$VERSION already exists. Skipping release."
-            echo "exists=true" >> $GITHUB_OUTPUT
+          # Trova il tag più recente che rispetta il formato x.y.z
+          LATEST_TAG=$(git tag --list --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -n1)
+          if [ -z "$LATEST_TAG" ]; then
+            echo "No previous tag found, using version $VERSION"
+            echo "proceed=true" >> $GITHUB_OUTPUT
           else
-            echo "exists=false" >> $GITHUB_OUTPUT
+            # Confronta la versione di package.json con il tag più recente
+            if [ "$VERSION" = "$LATEST_TAG" ]; then
+              # Se sono uguali, bump patch version
+              npm version patch --no-git-tag-version
+              git config user.name github-actions
+              git config user.email github-actions@github.com
+              git add package.json package-lock.json || true
+              git commit -m "chore: bump version [skip ci]"
+              git push
+              # Ricalcola la nuova versione dopo il bump
+              VERSION=$(node -p "require('./package.json').version")
+              echo "version=$VERSION" >> $GITHUB_OUTPUT
+            else
+              # Se la versione è maggiore, procedi
+              echo "version=$VERSION" >> $GITHUB_OUTPUT
+            fi
           fi
-
-      - name: Bump patch version (se richiesto)
-        if: steps.check_tag.outputs.exists == 'true'
-        run: |
-          npm version patch --no-git-tag-version
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add package.json package-lock.json || true
-          git commit -m "chore: bump version [skip ci]"
-          git push
 
       - name: Read version from package.json
         id: pkg
