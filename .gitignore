@@ -1,4 +1,4 @@
 .env
 .DS_Store
-.command_to_run_after_update
+.command_to_run_for_update
 node_modules
