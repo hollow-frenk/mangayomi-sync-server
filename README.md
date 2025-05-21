@@ -1,9 +1,9 @@
 # Mangayomi Sync Server
 
-Server di sincronizzazione per Mangayomi.
+Server di sincronizzazione per [Mangayomi](https://github.com/kodjodevf/mangayomi), sviluppato con amore da [Moustapha Kodjo Amadou](https://github.com/kodjodevf).
 
 ## Requisiti di sviluppo
-- **Node.js** >= 18 (consigliato l'ultima LTS)
+- [**Node.js** >= 22.16.0 (consigliato l'ultima LTS)](https://nodejs.org/en/download)
 - **npm** >= 9
 - **Docker** e **Docker Compose** (opzionale, solo per test/avvio containerizzato)
 - **Typescript** (installato come devDependency)
@@ -33,9 +33,9 @@ Server di sincronizzazione per Mangayomi.
    npm install
    ```
 3. Per la scrittura di codice TypeScript, puoi usare qualsiasi editor, ma è consigliato **VS Code** con le estensioni:
-   - ESLint
-   - Prettier
-   - TypeScript
+   - [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+   - [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+   - [NPM](https://marketplace.visualstudio.com/items?itemName=idered.npm)
 4. Per avviare il server in sviluppo:
    ```bash
    npm run build && npm start
