@@ -21,7 +21,7 @@ Server di sincronizzazione per Mangayomi.
 - `POST /upload/full`: upload backup completo
 - `GET /download`: scarica backup
 
-### Setup ambiente di sviluppo
+## Setup ambiente di sviluppo
 
 1. Clona la repository:
    ```bash
@@ -51,7 +51,7 @@ Server di sincronizzazione per Mangayomi.
    docker compose up --build
    ```
 
-### Convenzioni e consigli per contribuire
+## Convenzioni e consigli per contribuire
 - Segui la struttura delle cartelle già presente (`src/`, `model/`, `migration/`, ecc.)
 - Scrivi codice tipizzato e usa le interfacce/DTO già esistenti
 - Prima di aprire una PR, assicurati che il progetto compili senza errori (`npm run build`)
@@ -59,7 +59,7 @@ Server di sincronizzazione per Mangayomi.
 - Se modifichi la struttura dei dati, aggiorna la documentazione e i tipi
 - Per domande o dubbi, apri una issue
 
-### Avvio con Docker Compose
+## Avvio con Docker Compose
 
 Per utilizzare il server tramite Docker Compose:
 
@@ -79,7 +79,7 @@ COMPOSE_BAKE=true docker compose build && docker compose down && docker compose 
 
 Questo comando ricostruirà le immagini Docker e riavvierà i servizi con la versione aggiornata del codice.
 
-### Avvio senza Docker (modalità locale)
+## Avvio senza Docker (modalità locale)
 
 Per utilizzare il server in locale
 
